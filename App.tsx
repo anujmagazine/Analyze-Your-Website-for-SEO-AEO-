@@ -82,6 +82,13 @@ const App: React.FC = () => {
     }
   };
 
+  const renderMetric = (value: number | string | undefined, unit: string = "") => {
+    if (value === 0 || value === "0" || value === undefined) {
+      return <span className="text-gray-400 font-medium italic">--</span>;
+    }
+    return <span className="font-semibold text-gray-800">{value}{unit}</span>;
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header */}
@@ -227,7 +234,10 @@ const App: React.FC = () => {
                   
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 pt-6 border-t border-gray-50">
                     <div>
-                      <p className="text-xs font-bold text-gray-400 uppercase mb-1">Structured Data</p>
+                      <p className="text-xs font-bold text-gray-400 uppercase mb-1 flex items-center">
+                        Structured Data
+                        <Info className="w-3 h-3 ml-1 text-gray-300" title="JSON-LD / Schema.org presence" />
+                      </p>
                       <div className="flex items-center space-x-1">
                         {result.technicalInsights.structuredData ? (
                           <CheckCircle2 className="w-4 h-4 text-green-500" />
@@ -239,21 +249,21 @@ const App: React.FC = () => {
                     </div>
                     <div>
                       <p className="text-xs font-bold text-gray-400 uppercase mb-1">Mobile Opt.</p>
-                      <span className="font-semibold text-gray-800">{result.technicalInsights.mobileOptimization}%</span>
+                      {renderMetric(result.technicalInsights.mobileOptimization, "%")}
                     </div>
                     <div>
                       <p className="text-xs font-bold text-gray-400 uppercase mb-1">Readability</p>
-                      <span className="font-semibold text-gray-800">{result.technicalInsights.readabilityScore}/100</span>
+                      {renderMetric(result.technicalInsights.readabilityScore, "/100")}
                     </div>
                     <div>
                       <p className="text-xs font-bold text-gray-400 uppercase mb-1">Est. Load</p>
-                      <span className="font-semibold text-gray-800">{result.technicalInsights.loadTimeEstimate}</span>
+                      {renderMetric(result.technicalInsights.loadTimeEstimate)}
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Methodology Explainer (New) */}
+              {/* Methodology Explainer */}
               <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8">
                 <div className="flex flex-col md:flex-row gap-8">
                   <div className="flex-1 space-y-4">

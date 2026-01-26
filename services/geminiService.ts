@@ -11,7 +11,12 @@ export const analyzeWebsite = async (url: string): Promise<AnalysisResult> => {
     
     Research this website using your internal knowledge and Google Search to evaluate:
     1. Traditional SEO factors: Technical health, keyword strategy, backlink profile reputation, and mobile-friendliness.
-    2. AEO factors: How well this site is structured for LLMs (Large Language Models) like Gemini, GPT-4, and Perplexity. Look for schema.org markup, semantic clarity, factual consistency, and brand authority in AI-driven answers.
+    2. AEO factors: How well this site is structured for LLMs (Large Large Language Models). Look for schema.org markup, semantic clarity, factual consistency, and brand authority.
+    
+    For the technicalInsights section, please provide realistic estimates:
+    - mobileOptimization: A percentage score (1-100) based on responsive design best practices.
+    - readabilityScore: A score (1-100) based on content complexity (like Flesch-Kincaid). Do NOT return 0 unless the site is literally empty.
+    - loadTimeEstimate: A string estimate like "1.2s" or "2.5s".
     
     Provide a detailed audit in the requested JSON format. Be critical and practical.
   `;
