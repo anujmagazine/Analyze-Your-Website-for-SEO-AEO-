@@ -1,17 +1,21 @@
 
-import React, { useState, useEffect } from 'react';
-import { Search, Globe, ShieldCheck, Zap, AlertCircle, CheckCircle2, ListChecks, History, Link as LinkIcon, BarChart3, ChevronRight, Github } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Search, Globe, ShieldCheck, Zap, AlertCircle, CheckCircle2, ListChecks, History, Link as LinkIcon, BarChart3, ChevronRight, Github, Download, FileText } from 'lucide-react';
 import { analyzeWebsite } from './services/geminiService';
 import { AnalysisResult, HistoryItem } from './types';
 import ScoreGauge from './components/ScoreGauge';
 import RecommendationCard from './components/RecommendationCard';
+import { jsPDF } from 'jspdf';
+import html2canvas from 'html2canvas';
 
 const App: React.FC = () => {
   const [url, setUrl] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [history, setHistory] = useState<HistoryItem[]>([]);
+  const reportRef = useRef<HTMLDivElement>(null);
 
   // Load history on mount
   useEffect(() => {
@@ -44,6 +48,39 @@ const App: React.FC = () => {
       setError(err.message || "An unexpected error occurred");
     } finally {
       setIsAnalyzing(false);
+    }
+  };
+
+  const handleDownloadPDF = async () => {
+    if (!reportRef.current || !result) return;
+    
+    setIsExporting(true);
+    try {
+      const element = reportRef.current;
+      const canvas = await html2canvas(element, {
+        scale: 2, // Better resolution for PDF
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#f9fafb', // Match bg-gray-50
+      });
+      
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const imgProps = pdf.getImageProperties(imgData);
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+      
+      // If content is longer than one page, jsPDF handles it better with multiple pages
+      // but for a simple snapshot, this works well.
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      
+      const fileName = `AuditAI-Report-${result.url.replace(/[^a-z0-9]/gi, '_')}.pdf`;
+      pdf.save(fileName);
+    } catch (err) {
+      console.error('PDF Generation failed:', err);
+      alert('Failed to generate PDF. Please try again.');
+    } finally {
+      setIsExporting(false);
     }
   };
 
@@ -148,162 +185,181 @@ const App: React.FC = () => {
         {/* Audit Result Display */}
         {result && (
           <div className="space-y-8 animate-in slide-in-from-bottom-10 duration-700">
-            {/* Summary Cards */}
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-              <div className="lg:col-span-1 bg-white p-8 rounded-3xl shadow-sm border border-gray-100 flex flex-col items-center justify-center">
-                <ScoreGauge score={result.overallScore} label="Overall Score" />
-                <div className="mt-6 text-center">
-                  <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mb-1">Status</p>
-                  <p className={`font-bold ${result.overallScore > 75 ? 'text-green-600' : 'text-yellow-600'}`}>
-                    {result.overallScore > 75 ? 'Good Performance' : 'Needs Optimization'}
+            {/* Action Bar for Results */}
+            <div className="flex justify-between items-center px-2">
+              <h2 className="text-2xl font-bold text-gray-900">Audit Results</h2>
+              <button
+                onClick={handleDownloadPDF}
+                disabled={isExporting}
+                className="flex items-center space-x-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-50 hover:border-indigo-300 transition-all shadow-sm disabled:opacity-50"
+              >
+                {isExporting ? (
+                  <div className="w-4 h-4 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <Download className="w-4 h-4" />
+                )}
+                <span>{isExporting ? 'Generating PDF...' : 'Download Report'}</span>
+              </button>
+            </div>
+
+            <div ref={reportRef} className="space-y-8 p-1">
+              {/* Summary Cards */}
+              <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                <div className="lg:col-span-1 bg-white p-8 rounded-3xl shadow-sm border border-gray-100 flex flex-col items-center justify-center">
+                  <ScoreGauge score={result.overallScore} label="Overall Score" />
+                  <div className="mt-6 text-center">
+                    <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mb-1">Status</p>
+                    <p className={`font-bold ${result.overallScore > 75 ? 'text-green-600' : 'text-yellow-600'}`}>
+                      {result.overallScore > 75 ? 'Good Performance' : 'Needs Optimization'}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="lg:col-span-3 bg-white p-8 rounded-3xl shadow-sm border border-gray-100 relative overflow-hidden">
+                  <div className="absolute top-0 right-0 p-6 opacity-10">
+                    <BarChart3 className="w-32 h-32 text-indigo-600" />
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                    <ListChecks className="w-6 h-6 mr-2 text-indigo-600" />
+                    Executive Summary
+                  </h3>
+                  <p className="text-gray-600 leading-relaxed max-w-2xl mb-6">
+                    {result.summary}
                   </p>
+                  
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 pt-6 border-t border-gray-50">
+                    <div>
+                      <p className="text-xs font-bold text-gray-400 uppercase mb-1">Structured Data</p>
+                      <div className="flex items-center space-x-1">
+                        {result.technicalInsights.structuredData ? (
+                          <CheckCircle2 className="w-4 h-4 text-green-500" />
+                        ) : (
+                          <AlertCircle className="w-4 h-4 text-red-500" />
+                        )}
+                        <span className="font-semibold">{result.technicalInsights.structuredData ? 'Present' : 'Missing'}</span>
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-gray-400 uppercase mb-1">Mobile Opt.</p>
+                      <span className="font-semibold text-gray-800">{result.technicalInsights.mobileOptimization}%</span>
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-gray-400 uppercase mb-1">Readability</p>
+                      <span className="font-semibold text-gray-800">{result.technicalInsights.readabilityScore}/100</span>
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-gray-400 uppercase mb-1">Est. Load</p>
+                      <span className="font-semibold text-gray-800">{result.technicalInsights.loadTimeEstimate}</span>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              <div className="lg:col-span-3 bg-white p-8 rounded-3xl shadow-sm border border-gray-100 relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-6 opacity-10">
-                  <BarChart3 className="w-32 h-32 text-indigo-600" />
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
-                  <ListChecks className="w-6 h-6 mr-2 text-indigo-600" />
-                  Executive Summary
-                </h3>
-                <p className="text-gray-600 leading-relaxed max-w-2xl mb-6">
-                  {result.summary}
-                </p>
-                
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 pt-6 border-t border-gray-50">
-                  <div>
-                    <p className="text-xs font-bold text-gray-400 uppercase mb-1">Structured Data</p>
-                    <div className="flex items-center space-x-1">
-                      {result.technicalInsights.structuredData ? (
-                        <CheckCircle2 className="w-4 h-4 text-green-500" />
-                      ) : (
-                        <AlertCircle className="w-4 h-4 text-red-500" />
-                      )}
-                      <span className="font-semibold">{result.technicalInsights.structuredData ? 'Present' : 'Missing'}</span>
+              {/* Deep Dives */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {/* SEO Analysis */}
+                <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+                  <div className="p-6 bg-indigo-50 border-b border-indigo-100 flex justify-between items-center">
+                    <h3 className="text-lg font-bold text-indigo-900 flex items-center">
+                      <Globe className="w-5 h-5 mr-2" />
+                      Traditional SEO Analysis
+                    </h3>
+                    <div className="bg-white px-3 py-1 rounded-full text-indigo-600 font-bold text-sm shadow-sm">
+                      {result.seo.score}/100
                     </div>
                   </div>
-                  <div>
-                    <p className="text-xs font-bold text-gray-400 uppercase mb-1">Mobile Opt.</p>
-                    <span className="font-semibold text-gray-800">{result.technicalInsights.mobileOptimization}%</span>
+                  <div className="p-8 space-y-8">
+                    <div className="grid grid-cols-1 gap-4">
+                      <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Strengths & Weaknesses</h4>
+                      <div className="space-y-2">
+                        {result.seo.pros.slice(0, 3).map((pro, i) => (
+                          <div key={i} className="flex items-start space-x-2 text-sm text-gray-700 bg-green-50/50 p-2 rounded-lg">
+                            <CheckCircle2 className="w-4 h-4 text-green-500 shrink-0 mt-0.5" />
+                            <span>{pro}</span>
+                          </div>
+                        ))}
+                        {result.seo.cons.slice(0, 3).map((con, i) => (
+                          <div key={i} className="flex items-start space-x-2 text-sm text-gray-700 bg-red-50/50 p-2 rounded-lg">
+                            <AlertCircle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
+                            <span>{con}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Recommended Actions</h4>
+                      {result.seo.recommendations.map((rec, i) => (
+                        <RecommendationCard key={i} {...rec} />
+                      ))}
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-xs font-bold text-gray-400 uppercase mb-1">Readability</p>
-                    <span className="font-semibold text-gray-800">{result.technicalInsights.readabilityScore}/100</span>
+                </div>
+
+                {/* AEO Analysis */}
+                <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+                  <div className="p-6 bg-violet-50 border-b border-violet-100 flex justify-between items-center">
+                    <h3 className="text-lg font-bold text-violet-900 flex items-center">
+                      <Zap className="w-5 h-5 mr-2" />
+                      AI Engine Optimization (AEO)
+                    </h3>
+                    <div className="bg-white px-3 py-1 rounded-full text-violet-600 font-bold text-sm shadow-sm">
+                      {result.aeo.score}/100
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-xs font-bold text-gray-400 uppercase mb-1">Est. Load</p>
-                    <span className="font-semibold text-gray-800">{result.technicalInsights.loadTimeEstimate}</span>
+                  <div className="p-8 space-y-8">
+                    <div className="grid grid-cols-1 gap-4">
+                      <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest">LLM Visibility Factors</h4>
+                      <div className="space-y-2">
+                        {result.aeo.pros.slice(0, 3).map((pro, i) => (
+                          <div key={i} className="flex items-start space-x-2 text-sm text-gray-700 bg-green-50/50 p-2 rounded-lg">
+                            <CheckCircle2 className="w-4 h-4 text-green-500 shrink-0 mt-0.5" />
+                            <span>{pro}</span>
+                          </div>
+                        ))}
+                        {result.aeo.cons.slice(0, 3).map((con, i) => (
+                          <div key={i} className="flex items-start space-x-2 text-sm text-gray-700 bg-red-50/50 p-2 rounded-lg">
+                            <AlertCircle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
+                            <span>{con}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest">AI Readiness Actions</h4>
+                      {result.aeo.recommendations.map((rec, i) => (
+                        <RecommendationCard key={i} {...rec} />
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            {/* Deep Dives */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {/* SEO Analysis */}
-              <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
-                <div className="p-6 bg-indigo-50 border-b border-indigo-100 flex justify-between items-center">
-                  <h3 className="text-lg font-bold text-indigo-900 flex items-center">
-                    <Globe className="w-5 h-5 mr-2" />
-                    Traditional SEO Analysis
-                  </h3>
-                  <div className="bg-white px-3 py-1 rounded-full text-indigo-600 font-bold text-sm shadow-sm">
-                    {result.seo.score}/100
+              {/* Sources & Grounding */}
+              {result.sources && result.sources.length > 0 && (
+                <div className="bg-gray-50 p-6 rounded-3xl border border-dashed border-gray-200">
+                  <div className="flex items-center space-x-2 mb-4">
+                    <LinkIcon className="w-4 h-4 text-gray-400" />
+                    <h4 className="text-sm font-bold text-gray-600 uppercase tracking-widest">Audit Reference Sources</h4>
                   </div>
-                </div>
-                <div className="p-8 space-y-8">
-                  <div className="grid grid-cols-1 gap-4">
-                    <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Strengths & Weaknesses</h4>
-                    <div className="space-y-2">
-                      {result.seo.pros.slice(0, 3).map((pro, i) => (
-                        <div key={i} className="flex items-start space-x-2 text-sm text-gray-700 bg-green-50/50 p-2 rounded-lg">
-                          <CheckCircle2 className="w-4 h-4 text-green-500 shrink-0 mt-0.5" />
-                          <span>{pro}</span>
-                        </div>
-                      ))}
-                      {result.seo.cons.slice(0, 3).map((con, i) => (
-                        <div key={i} className="flex items-start space-x-2 text-sm text-gray-700 bg-red-50/50 p-2 rounded-lg">
-                          <AlertCircle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
-                          <span>{con}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="space-y-4">
-                    <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Recommended Actions</h4>
-                    {result.seo.recommendations.map((rec, i) => (
-                      <RecommendationCard key={i} {...rec} />
+                  <div className="flex flex-wrap gap-4">
+                    {result.sources.map((source, i) => (
+                      <a
+                        key={i}
+                        href={source.uri}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs text-indigo-600 hover:text-indigo-800 flex items-center bg-white px-3 py-1.5 rounded-full border border-gray-100 shadow-sm"
+                      >
+                        {source.title}
+                        <ChevronRight className="w-3 h-3 ml-1" />
+                      </a>
                     ))}
                   </div>
                 </div>
-              </div>
-
-              {/* AEO Analysis */}
-              <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
-                <div className="p-6 bg-violet-50 border-b border-violet-100 flex justify-between items-center">
-                  <h3 className="text-lg font-bold text-violet-900 flex items-center">
-                    <Zap className="w-5 h-5 mr-2" />
-                    AI Engine Optimization (AEO)
-                  </h3>
-                  <div className="bg-white px-3 py-1 rounded-full text-violet-600 font-bold text-sm shadow-sm">
-                    {result.aeo.score}/100
-                  </div>
-                </div>
-                <div className="p-8 space-y-8">
-                  <div className="grid grid-cols-1 gap-4">
-                    <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest">LLM Visibility Factors</h4>
-                    <div className="space-y-2">
-                      {result.aeo.pros.slice(0, 3).map((pro, i) => (
-                        <div key={i} className="flex items-start space-x-2 text-sm text-gray-700 bg-green-50/50 p-2 rounded-lg">
-                          <CheckCircle2 className="w-4 h-4 text-green-500 shrink-0 mt-0.5" />
-                          <span>{pro}</span>
-                        </div>
-                      ))}
-                      {result.aeo.cons.slice(0, 3).map((con, i) => (
-                        <div key={i} className="flex items-start space-x-2 text-sm text-gray-700 bg-red-50/50 p-2 rounded-lg">
-                          <AlertCircle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
-                          <span>{con}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="space-y-4">
-                    <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest">AI Readiness Actions</h4>
-                    {result.aeo.recommendations.map((rec, i) => (
-                      <RecommendationCard key={i} {...rec} />
-                    ))}
-                  </div>
-                </div>
-              </div>
+              )}
             </div>
-
-            {/* Sources & Grounding */}
-            {result.sources && result.sources.length > 0 && (
-              <div className="bg-gray-50 p-6 rounded-3xl border border-dashed border-gray-200">
-                <div className="flex items-center space-x-2 mb-4">
-                  <LinkIcon className="w-4 h-4 text-gray-400" />
-                  <h4 className="text-sm font-bold text-gray-600 uppercase tracking-widest">Audit Reference Sources</h4>
-                </div>
-                <div className="flex flex-wrap gap-4">
-                  {result.sources.map((source, i) => (
-                    <a
-                      key={i}
-                      href={source.uri}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-xs text-indigo-600 hover:text-indigo-800 flex items-center bg-white px-3 py-1.5 rounded-full border border-gray-100 shadow-sm"
-                    >
-                      {source.title}
-                      <ChevronRight className="w-3 h-3 ml-1" />
-                    </a>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
         )}
 
