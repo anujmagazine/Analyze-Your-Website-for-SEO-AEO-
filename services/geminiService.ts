@@ -9,16 +9,28 @@ export const analyzeWebsite = async (url: string): Promise<AnalysisResult> => {
     Act as a world-class SEO (Search Engine Optimization) and AEO (AI Engine Optimization) specialist. 
     Analyze the website: ${url}.
     
-    Research this website using your internal knowledge and Google Search to evaluate:
-    1. Traditional SEO factors: Technical health, keyword strategy, backlink profile reputation, and mobile-friendliness.
-    2. AEO factors: How well this site is structured for LLMs (Large Large Language Models). Look for schema.org markup, semantic clarity, factual consistency, and brand authority.
+    ### STRICT CONSISTENCY REQUIREMENT:
+    You must use a standardized, deterministic scoring protocol. If you analyze the same URL twice, your scores should be identical.
+    
+    ### SCORING RUBRIC:
+    1. SEO (Search Engine Optimization):
+       - Technical (H1s, Meta, Alt Tags): 40 pts
+       - Performance (Speed estimates): 30 pts
+       - Authority (Backlink reputation): 30 pts
+    
+    2. AEO (AI Engine Optimization):
+       - Structured Data (Schema.org): 40 pts
+       - Semantic Clarity (Direct answers): 30 pts
+       - E-E-A-T (Experience, Expertise, Authoritativeness, Trustworthiness): 30 pts
+    
+    Research this website using your internal knowledge and Google Search to evaluate these specific points.
     
     For the technicalInsights section, please provide realistic estimates:
     - mobileOptimization: A percentage score (1-100) based on responsive design best practices.
-    - readabilityScore: A score (1-100) based on content complexity (like Flesch-Kincaid). Do NOT return 0 unless the site is literally empty.
+    - readabilityScore: A score (1-100) based on content complexity (like Flesch-Kincaid). Do NOT return 0.
     - loadTimeEstimate: A string estimate like "1.2s" or "2.5s".
     
-    Provide a detailed audit in the requested JSON format. Be critical and practical.
+    Provide a detailed audit in the requested JSON format. Be objective, critical, and consistent.
   `;
 
   try {
@@ -28,6 +40,9 @@ export const analyzeWebsite = async (url: string): Promise<AnalysisResult> => {
       config: {
         tools: [{ googleSearch: {} }],
         responseMimeType: "application/json",
+        // Setting temperature to 0 and providing a seed ensures consistency
+        temperature: 0,
+        seed: 42,
         responseSchema: {
           type: Type.OBJECT,
           properties: {
