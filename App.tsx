@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, Globe, ShieldCheck, Zap, AlertCircle, CheckCircle2, ListChecks, History, Link as LinkIcon, BarChart3, ChevronRight, Github, Download, FileText } from 'lucide-react';
+import { Search, Globe, ShieldCheck, Zap, AlertCircle, CheckCircle2, ListChecks, History, Link as LinkIcon, BarChart3, ChevronRight, Github, Download, Info, HelpCircle, BookOpen } from 'lucide-react';
 import { analyzeWebsite } from './services/geminiService';
 import { AnalysisResult, HistoryItem } from './types';
 import ScoreGauge from './components/ScoreGauge';
@@ -58,10 +58,10 @@ const App: React.FC = () => {
     try {
       const element = reportRef.current;
       const canvas = await html2canvas(element, {
-        scale: 2, // Better resolution for PDF
+        scale: 2,
         useCORS: true,
         logging: false,
-        backgroundColor: '#f9fafb', // Match bg-gray-50
+        backgroundColor: '#f9fafb',
       });
       
       const imgData = canvas.toDataURL('image/png');
@@ -70,8 +70,6 @@ const App: React.FC = () => {
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
       
-      // If content is longer than one page, jsPDF handles it better with multiple pages
-      // but for a simple snapshot, this works well.
       pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
       
       const fileName = `AuditAI-Report-${result.url.replace(/[^a-z0-9]/gi, '_')}.pdf`;
@@ -251,6 +249,55 @@ const App: React.FC = () => {
                       <p className="text-xs font-bold text-gray-400 uppercase mb-1">Est. Load</p>
                       <span className="font-semibold text-gray-800">{result.technicalInsights.loadTimeEstimate}</span>
                     </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Methodology Explainer (New) */}
+              <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8">
+                <div className="flex flex-col md:flex-row gap-8">
+                  <div className="flex-1 space-y-4">
+                    <h3 className="text-lg font-bold text-gray-900 flex items-center">
+                      <HelpCircle className="w-5 h-5 mr-2 text-indigo-600" />
+                      How we calculate your score
+                    </h3>
+                    <p className="text-sm text-gray-600 leading-relaxed">
+                      Our proprietary algorithm analyzes your site through the lens of a weighted system that balances traditional indexing with AI engine readability.
+                    </p>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
+                      <div className="p-4 rounded-2xl bg-indigo-50/50 border border-indigo-100">
+                        <p className="text-xs font-bold text-indigo-600 uppercase mb-2">Technical Health (30%)</p>
+                        <p className="text-[13px] text-gray-600">Speed, crawlability, and mobile performance.</p>
+                      </div>
+                      <div className="p-4 rounded-2xl bg-emerald-50/50 border border-emerald-100">
+                        <p className="text-xs font-bold text-emerald-600 uppercase mb-2">Content Depth (40%)</p>
+                        <p className="text-[13px] text-gray-600">Quality, intent matching, and semantic clarity.</p>
+                      </div>
+                      <div className="p-4 rounded-2xl bg-violet-50/50 border border-violet-100">
+                        <p className="text-xs font-bold text-violet-600 uppercase mb-2">AEO Readiness (30%)</p>
+                        <p className="text-[13px] text-gray-600">Schema markup and data connectivity for LLMs.</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="md:w-1/3 bg-gray-50 rounded-2xl p-6 border border-gray-100">
+                    <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4 flex items-center">
+                      <BookOpen className="w-3 h-3 mr-1" />
+                      Terminology Guide
+                    </h4>
+                    <ul className="space-y-4">
+                      <li className="text-xs leading-relaxed">
+                        <span className="font-bold text-gray-700 block mb-0.5">E-E-A-T</span>
+                        Experience, Expertise, Authoritativeness, and Trustworthiness. The pillar of modern search quality.
+                      </li>
+                      <li className="text-xs leading-relaxed">
+                        <span className="font-bold text-gray-700 block mb-0.5">SEO (Search Engine Optimization)</span>
+                        Traditional optimization for crawlers like Googlebot to rank in SERPs.
+                      </li>
+                      <li className="text-xs leading-relaxed">
+                        <span className="font-bold text-gray-700 block mb-0.5">AEO (AI Engine Optimization)</span>
+                        Structuring data so AI models can accurately extract and cite your site as a primary source.
+                      </li>
+                    </ul>
                   </div>
                 </div>
               </div>
