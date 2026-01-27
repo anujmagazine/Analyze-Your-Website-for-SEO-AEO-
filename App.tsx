@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, Globe, ShieldCheck, Zap, AlertCircle, CheckCircle2, ListChecks, History, Link as LinkIcon, BarChart3, ChevronRight, Github, Download, Info, HelpCircle, BookOpen } from 'lucide-react';
+import { Search, Globe, ShieldCheck, Zap, AlertCircle, CheckCircle2, ListChecks, History, Link as LinkIcon, BarChart3, ChevronRight, Github, Download, Info, HelpCircle, BookOpen, Calendar } from 'lucide-react';
 import { analyzeWebsite } from './services/geminiService';
 import { AnalysisResult, HistoryItem } from './types';
 import ScoreGauge from './components/ScoreGauge';
@@ -87,6 +87,14 @@ const App: React.FC = () => {
       return <span className="text-gray-400 font-medium italic">--</span>;
     }
     return <span className="font-semibold text-gray-800">{value}{unit}</span>;
+  };
+
+  const getCleanUrl = (rawUrl: string) => {
+    try {
+      return rawUrl.replace(/^https?:\/\//, '').split('/')[0];
+    } catch {
+      return rawUrl;
+    }
   };
 
   return (
@@ -192,7 +200,7 @@ const App: React.FC = () => {
           <div className="space-y-8 animate-in slide-in-from-bottom-10 duration-700">
             {/* Action Bar for Results */}
             <div className="flex justify-between items-center px-2">
-              <h2 className="text-2xl font-bold text-gray-900">Audit Results</h2>
+              <h2 className="text-2xl font-bold text-gray-900">Audit Report</h2>
               <button
                 onClick={handleDownloadPDF}
                 disabled={isExporting}
@@ -208,6 +216,22 @@ const App: React.FC = () => {
             </div>
 
             <div ref={reportRef} className="space-y-8 p-1">
+              {/* Professional Document Title Section */}
+              <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 border-l-4 border-l-indigo-600">
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+                  <div className="space-y-2">
+                    <p className="text-indigo-600 font-bold text-xs uppercase tracking-widest">Official Strategy Audit</p>
+                    <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight">
+                      SEO & AEO Analysis for <span className="text-indigo-600">{getCleanUrl(result.url)}</span>
+                    </h1>
+                  </div>
+                  <div className="flex items-center text-sm text-gray-500 font-medium bg-gray-50 px-4 py-2 rounded-xl">
+                    <Calendar className="w-4 h-4 mr-2" />
+                    <span>{new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
+                  </div>
+                </div>
+              </div>
+
               {/* Summary Cards */}
               <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
                 <div className="lg:col-span-1 bg-white p-8 rounded-3xl shadow-sm border border-gray-100 flex flex-col items-center justify-center">
