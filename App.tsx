@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, Globe, ShieldCheck, Zap, AlertCircle, CheckCircle2, ListChecks, History, Link as LinkIcon, BarChart3, ChevronRight, Github, Download, Info, HelpCircle, BookOpen, Calendar } from 'lucide-react';
+import { Search, Globe, ShieldCheck, Zap, AlertCircle, CheckCircle2, ListChecks, History, Link as LinkIcon, BarChart3, ChevronRight, Github, Download, Info, HelpCircle, BookOpen, Calendar, MessageSquareQuote } from 'lucide-react';
 import { analyzeWebsite } from './services/geminiService';
 import { AnalysisResult, HistoryItem } from './types';
 import ScoreGauge from './components/ScoreGauge';
@@ -236,11 +236,18 @@ const App: React.FC = () => {
               <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
                 <div className="lg:col-span-1 bg-white p-8 rounded-3xl shadow-sm border border-gray-100 flex flex-col items-center justify-center">
                   <ScoreGauge score={result.overallScore} label="Overall Score" />
-                  <div className="mt-6 text-center">
-                    <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mb-1">Status</p>
-                    <p className={`font-bold ${result.overallScore > 75 ? 'text-green-600' : 'text-yellow-600'}`}>
-                      {result.overallScore > 75 ? 'Good Performance' : 'Needs Optimization'}
-                    </p>
+                  <div className="mt-6 text-center space-y-3">
+                    <div>
+                      <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mb-1">Status</p>
+                      <p className={`font-bold ${result.overallScore > 75 ? 'text-green-600' : 'text-yellow-600'}`}>
+                        {result.overallScore > 75 ? 'Good Performance' : 'Needs Optimization'}
+                      </p>
+                    </div>
+                    <div className="pt-3 border-t border-gray-100">
+                      <p className="text-[10px] leading-tight text-gray-400 italic">
+                        The <b>Overall Score</b> represents your site's combined readiness for both human searchers and AI agents.
+                      </p>
+                    </div>
                   </div>
                 </div>
 
@@ -293,43 +300,43 @@ const App: React.FC = () => {
                   <div className="flex-1 space-y-4">
                     <h3 className="text-lg font-bold text-gray-900 flex items-center">
                       <HelpCircle className="w-5 h-5 mr-2 text-indigo-600" />
-                      How we calculate your score
+                      Why these scores are necessary
                     </h3>
                     <p className="text-sm text-gray-600 leading-relaxed">
-                      Our proprietary algorithm analyzes your site through the lens of a weighted system that balances traditional indexing with AI engine readability.
+                      As user behavior shifts from browsing links to asking questions, websites must satisfy two distinct "gatekeepers." Our weighted score ensures you aren't ignoring the future of search.
                     </p>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
                       <div className="p-4 rounded-2xl bg-indigo-50/50 border border-indigo-100">
                         <p className="text-xs font-bold text-indigo-600 uppercase mb-2">Technical Health (30%)</p>
-                        <p className="text-[13px] text-gray-600">Speed, crawlability, and mobile performance.</p>
+                        <p className="text-[13px] text-gray-600">Necessary to ensure search engines can actually crawl and index your content without errors.</p>
                       </div>
                       <div className="p-4 rounded-2xl bg-emerald-50/50 border border-emerald-100">
                         <p className="text-xs font-bold text-emerald-600 uppercase mb-2">Content Depth (40%)</p>
-                        <p className="text-[13px] text-gray-600">Quality, intent matching, and semantic clarity.</p>
+                        <p className="text-[13px] text-gray-600">Necessary to satisfy user intent and establish your brand as a primary topical authority.</p>
                       </div>
                       <div className="p-4 rounded-2xl bg-violet-50/50 border border-violet-100">
                         <p className="text-xs font-bold text-violet-600 uppercase mb-2">AEO Readiness (30%)</p>
-                        <p className="text-[13px] text-gray-600">Schema markup and data connectivity for LLMs.</p>
+                        <p className="text-[13px] text-gray-600">Necessary for LLMs (like GPT) to trust your data enough to cite you in AI-generated answers.</p>
                       </div>
                     </div>
                   </div>
                   <div className="md:w-1/3 bg-gray-50 rounded-2xl p-6 border border-gray-100">
                     <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4 flex items-center">
                       <BookOpen className="w-3 h-3 mr-1" />
-                      Terminology Guide
+                      Score Interpretation
                     </h4>
                     <ul className="space-y-4">
                       <li className="text-xs leading-relaxed">
-                        <span className="font-bold text-gray-700 block mb-0.5">E-E-A-T</span>
-                        Experience, Expertise, Authoritativeness, and Trustworthiness. The pillar of modern search quality.
+                        <span className="font-bold text-gray-700 block mb-0.5">80-100: Market Leader</span>
+                        Your site is highly optimized for both traditional search and AI retrieval.
                       </li>
                       <li className="text-xs leading-relaxed">
-                        <span className="font-bold text-gray-700 block mb-0.5">SEO (Search Engine Optimization)</span>
-                        Traditional optimization for crawlers like Googlebot to rank in SERPs.
+                        <span className="font-bold text-gray-700 block mb-0.5">50-79: Vulnerable</span>
+                        You have basic SEO in place but are likely invisible to modern AI answer engines.
                       </li>
                       <li className="text-xs leading-relaxed">
-                        <span className="font-bold text-gray-700 block mb-0.5">AEO (AI Engine Optimization)</span>
-                        Structuring data so AI models can accurately extract and cite your site as a primary source.
+                        <span className="font-bold text-gray-700 block mb-0.5">0-49: Critical</span>
+                        Major technical or content barriers are preventing any meaningful visibility.
                       </li>
                     </ul>
                   </div>
@@ -339,7 +346,7 @@ const App: React.FC = () => {
               {/* Deep Dives */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {/* SEO Analysis */}
-                <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+                <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
                   <div className="p-6 bg-indigo-50 border-b border-indigo-100 flex justify-between items-center">
                     <h3 className="text-lg font-bold text-indigo-900 flex items-center">
                       <Globe className="w-5 h-5 mr-2" />
@@ -349,7 +356,14 @@ const App: React.FC = () => {
                       {result.seo.score}/100
                     </div>
                   </div>
-                  <div className="p-8 space-y-8">
+                  <div className="p-8 space-y-8 flex-1">
+                    <div className="p-4 bg-indigo-50/30 rounded-2xl border border-indigo-100 flex items-start space-x-3">
+                      <Info className="w-5 h-5 text-indigo-400 shrink-0 mt-0.5" />
+                      <p className="text-xs text-indigo-800 leading-relaxed">
+                        <b>Why this score matters:</b> Traditional SEO ensures you appear in SERPs (Search Engine Result Pages) for keywords humans use to find your business directly.
+                      </p>
+                    </div>
+
                     <div className="grid grid-cols-1 gap-4">
                       <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Strengths & Weaknesses</h4>
                       <div className="space-y-2">
@@ -378,7 +392,7 @@ const App: React.FC = () => {
                 </div>
 
                 {/* AEO Analysis */}
-                <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+                <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
                   <div className="p-6 bg-violet-50 border-b border-violet-100 flex justify-between items-center">
                     <h3 className="text-lg font-bold text-violet-900 flex items-center">
                       <Zap className="w-5 h-5 mr-2" />
@@ -388,7 +402,14 @@ const App: React.FC = () => {
                       {result.aeo.score}/100
                     </div>
                   </div>
-                  <div className="p-8 space-y-8">
+                  <div className="p-8 space-y-8 flex-1">
+                    <div className="p-4 bg-violet-50/30 rounded-2xl border border-violet-100 flex items-start space-x-3">
+                      <Zap className="w-5 h-5 text-violet-400 shrink-0 mt-0.5" />
+                      <p className="text-xs text-violet-800 leading-relaxed">
+                        <b>Why this score matters:</b> AEO measures your "citations-readiness." High scores mean AI models are more likely to include your content as a factual source in their responses.
+                      </p>
+                    </div>
+
                     <div className="grid grid-cols-1 gap-4">
                       <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest">LLM Visibility Factors</h4>
                       <div className="space-y-2">
@@ -414,6 +435,25 @@ const App: React.FC = () => {
                       ))}
                     </div>
                   </div>
+                </div>
+              </div>
+
+              {/* Footnotes Section */}
+              <div className="px-4 py-8 border-t border-gray-100">
+                <h4 className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-4 flex items-center">
+                  <MessageSquareQuote className="w-3 h-3 mr-2" />
+                  Report Footnotes
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4">
+                  <p className="text-[10px] text-gray-500 leading-relaxed italic">
+                    <sup>1</sup> <b>SEO Necessity:</b> Traditional Search Engine Optimization remains the foundation of digital traffic. Without it, you are ceding the 90% of searches that still occur on standard search engines to competitors.
+                  </p>
+                  <p className="text-[10px] text-gray-500 leading-relaxed italic">
+                    <sup>2</sup> <b>AEO Necessity:</b> AI Engine Optimization is a forward-looking necessity. As LLMs become primary entry points for discovery, brands without AEO will experience "AI Erasure"—being left out of generated recommendations.
+                  </p>
+                  <p className="text-[10px] text-gray-500 leading-relaxed italic">
+                    <sup>3</sup> <b>Metric Estimates:</b> Performance data is estimated using synthetic sampling of publicly available data. For high-precision technical metrics, use Google Search Console or a dedicated RUM (Real User Monitoring) tool.
+                  </p>
                 </div>
               </div>
 
