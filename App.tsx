@@ -438,6 +438,54 @@ const App: React.FC = () => {
                 </div>
               </div>
 
+              {/* Keyword Strategy Section */}
+              <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+                <div className="p-6 bg-emerald-50 border-b border-emerald-100 flex items-center">
+                  <BarChart3 className="w-5 h-5 mr-2 text-emerald-600" />
+                  <h3 className="text-lg font-bold text-emerald-900">Targeted Keyword Strategy</h3>
+                </div>
+                <div className="p-8">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                      <thead>
+                        <tr className="border-b border-gray-100">
+                          <th className="py-4 px-2 text-xs font-bold text-gray-400 uppercase tracking-widest">Target Keyword</th>
+                          <th className="py-4 px-2 text-xs font-bold text-gray-400 uppercase tracking-widest">Recommended Page</th>
+                          <th className="py-4 px-2 text-xs font-bold text-gray-400 uppercase tracking-widest">Strategic Reason</th>
+                          <th className="py-4 px-2 text-xs font-bold text-gray-400 uppercase tracking-widest">Difficulty</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {result.keywordStrategy.map((item, idx) => (
+                          <tr key={idx} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+                            <td className="py-4 px-2">
+                              <span className="font-semibold text-gray-900 bg-emerald-50 px-2 py-1 rounded text-sm">
+                                {item.keyword}
+                              </span>
+                            </td>
+                            <td className="py-4 px-2 text-sm text-gray-600 font-medium">
+                              {item.targetPage}
+                            </td>
+                            <td className="py-4 px-2 text-sm text-gray-500 leading-relaxed">
+                              {item.reason}
+                            </td>
+                            <td className="py-4 px-2">
+                              <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase border ${
+                                item.difficulty === 'Low' ? 'bg-green-100 text-green-700 border-green-200' :
+                                item.difficulty === 'Medium' ? 'bg-yellow-100 text-yellow-700 border-yellow-200' :
+                                'bg-red-100 text-red-700 border-red-200'
+                              }`}>
+                                {item.difficulty}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
               {/* Footnotes Section */}
               <div className="px-4 py-8 border-t border-gray-100">
                 <h4 className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-4 flex items-center">

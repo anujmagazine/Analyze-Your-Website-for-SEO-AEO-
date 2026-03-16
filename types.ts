@@ -23,6 +23,12 @@ export interface AnalysisResult {
     loadTimeEstimate: string;
   };
   sources: { title: string; uri: string }[];
+  keywordStrategy: {
+    keyword: string;
+    targetPage: string;
+    reason: string;
+    difficulty: 'Low' | 'Medium' | 'High';
+  }[];
 }
 
 export interface HistoryItem {

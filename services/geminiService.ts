@@ -33,6 +33,8 @@ export const analyzeWebsite = async (url: string): Promise<AnalysisResult> => {
     Provide a detailed audit in the requested JSON format. Be objective, critical, and consistent.
     
     For each recommendation, include a 'howToFix' field that explains in a simple way with concrete examples the actions the user can take to fix the identified weakness.
+    
+    Additionally, provide a 'keywordStrategy' section that lists at least 5 exact keywords that should be added to the site, specifying which page they should be added to, the reason why (e.g., high search volume, low competition, or semantic relevance), and the difficulty level.
   `;
 
   try {
@@ -104,9 +106,22 @@ export const analyzeWebsite = async (url: string): Promise<AnalysisResult> => {
                 loadTimeEstimate: { type: Type.STRING }
               },
               required: ["structuredData", "mobileOptimization", "readabilityScore", "loadTimeEstimate"]
+            },
+            keywordStrategy: {
+              type: Type.ARRAY,
+              items: {
+                type: Type.OBJECT,
+                properties: {
+                  keyword: { type: Type.STRING },
+                  targetPage: { type: Type.STRING },
+                  reason: { type: Type.STRING },
+                  difficulty: { type: Type.STRING, enum: ["Low", "Medium", "High"] }
+                },
+                required: ["keyword", "targetPage", "reason", "difficulty"]
+              }
             }
           },
-          required: ["url", "summary", "overallScore", "seo", "aeo", "technicalInsights"]
+          required: ["url", "summary", "overallScore", "seo", "aeo", "technicalInsights", "keywordStrategy"]
         }
       }
     });
