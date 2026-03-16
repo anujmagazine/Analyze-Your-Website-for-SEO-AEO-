@@ -406,7 +406,7 @@ const App: React.FC = () => {
                     <div className="p-4 bg-violet-50/30 rounded-2xl border border-violet-100 flex items-start space-x-3">
                       <Zap className="w-5 h-5 text-violet-400 shrink-0 mt-0.5" />
                       <p className="text-xs text-violet-800 leading-relaxed">
-                        <b>Why this score matters:</b> AEO measures your "citations-readiness." High scores mean AI models are more likely to include your content as a factual source in their responses.
+                        <b>Why this score matters:</b> AEO measures your "citations-readiness." High scores mean AI models are more likely to include your content as a factual source in their responses based on the <b>E-E-A-T</b> framework.
                       </p>
                     </div>
 
@@ -453,6 +453,9 @@ const App: React.FC = () => {
                   </p>
                   <p className="text-[10px] text-gray-500 leading-relaxed italic">
                     <sup>3</sup> <b>Metric Estimates:</b> Performance data is estimated using synthetic sampling of publicly available data. For high-precision technical metrics, use Google Search Console or a dedicated RUM (Real User Monitoring) tool.
+                  </p>
+                  <p className="text-[10px] text-gray-500 leading-relaxed italic">
+                    <sup>4</sup> <b>E-E-A-T Framework:</b> Stands for <b>Experience, Expertise, Authoritativeness, and Trustworthiness</b>. This is the primary framework used by search engines and AI to determine content quality and source credibility.
                   </p>
                 </div>
               </div>
