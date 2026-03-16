@@ -8,13 +8,13 @@ export interface AnalysisResult {
     score: number;
     pros: string[];
     cons: string[];
-    recommendations: { title: string; description: string; priority: 'High' | 'Medium' | 'Low' }[];
+    recommendations: { title: string; description: string; priority: 'High' | 'Medium' | 'Low'; howToFix?: string }[];
   };
   aeo: {
     score: number;
     pros: string[];
     cons: string[];
-    recommendations: { title: string; description: string; priority: 'High' | 'Medium' | 'Low' }[];
+    recommendations: { title: string; description: string; priority: 'High' | 'Medium' | 'Low'; howToFix?: string }[];
   };
   technicalInsights: {
     structuredData: boolean;

@@ -31,6 +31,8 @@ export const analyzeWebsite = async (url: string): Promise<AnalysisResult> => {
     - loadTimeEstimate: A string estimate like "1.2s" or "2.5s".
     
     Provide a detailed audit in the requested JSON format. Be objective, critical, and consistent.
+    
+    For each recommendation, include a 'howToFix' field that explains in a simple way with concrete examples the actions the user can take to fix the identified weakness.
   `;
 
   try {
@@ -62,9 +64,10 @@ export const analyzeWebsite = async (url: string): Promise<AnalysisResult> => {
                     properties: {
                       title: { type: Type.STRING },
                       description: { type: Type.STRING },
-                      priority: { type: Type.STRING }
+                      priority: { type: Type.STRING },
+                      howToFix: { type: Type.STRING, description: "Simple explanation and examples of how to fix this issue." }
                     },
-                    required: ["title", "description", "priority"]
+                    required: ["title", "description", "priority", "howToFix"]
                   }
                 }
               },
@@ -83,9 +86,10 @@ export const analyzeWebsite = async (url: string): Promise<AnalysisResult> => {
                     properties: {
                       title: { type: Type.STRING },
                       description: { type: Type.STRING },
-                      priority: { type: Type.STRING }
+                      priority: { type: Type.STRING },
+                      howToFix: { type: Type.STRING, description: "Simple explanation and examples of how to fix this issue." }
                     },
-                    required: ["title", "description", "priority"]
+                    required: ["title", "description", "priority", "howToFix"]
                   }
                 }
               },
